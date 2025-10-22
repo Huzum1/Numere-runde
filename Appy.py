@@ -54,99 +54,206 @@ variants_data = None
 rounds_data = None
 
 with col_upload1:
-    st.subheader("📤 Upload Variante (10000)")
-    st.caption("Format: ID, num1 num2 num3 num4")
+    st.subheader("📤 Variante (10000)")
     
-    variants_file = st.file_uploader("Alege fișier .txt cu variante", type=['txt'], key="variants")
+    variant_tab1, variant_tab2 = st.tabs(["📁 Upload Fișier", "✍️ Introducere Manuală"])
     
-    if variants_file:
-        try:
-            content = variants_file.read().decode('utf-8')
-            lines = [line.strip() for line in content.split('\n') if line.strip()]
-            
-            variants_list = []
-            for line in lines:
-                if ',' in line:
-                    parts = line.split(',', 1)
-                    variant_id = parts[0].strip()
-                    numbers = [int(x) for x in parts[1].strip().split()]
-                    variants_list.append({'id': variant_id, 'numbers': numbers})
-            
-            variants_data = variants_list
-            
-            # Statistics
-            st.success(f"✅ {len(variants_data)} variante încărcate")
-            
-            all_numbers = [num for v in variants_data for num in v['numbers']]
-            unique_numbers = set(all_numbers)
-            counter = Counter(all_numbers)
-            most_common = counter.most_common(1)[0]
-            least_common = counter.most_common()[-1]
-            
-            st.markdown(f"""
-            **Statistici:**
-            - Numere unice folosite: **{len(unique_numbers)} din {total_numbers}**
-            - Cel mai frecvent: **{most_common[0]}** (apare de {most_common[1]}× ori)
-            - Cel mai rar: **{least_common[0]}** (apare de {least_common[1]}× ori)
-            """)
-            
-            # Preview
-            with st.expander("👁️ Preview primele 5 variante"):
-                for i, v in enumerate(variants_data[:5]):
-                    st.text(f"{v['id']}, {' '.join(map(str, v['numbers']))}")
-                    
-        except Exception as e:
-            st.error(f"❌ Eroare la citirea fișierului: {str(e)}")
+    with variant_tab1:
+        st.caption("Format: ID, num1 num2 num3 num4")
+        variants_file = st.file_uploader("Alege fișier .txt cu variante", type=['txt'], key="variants")
+        
+        if variants_file:
+            try:
+                content = variants_file.read().decode('utf-8')
+                lines = [line.strip() for line in content.split('\n') if line.strip()]
+                
+                variants_list = []
+                for line in lines:
+                    if ',' in line:
+                        parts = line.split(',', 1)
+                        variant_id = parts[0].strip()
+                        numbers = [int(x) for x in parts[1].strip().split()]
+                        variants_list.append({'id': variant_id, 'numbers': numbers})
+                
+                variants_data = variants_list
+                
+                # Statistics
+                st.success(f"✅ {len(variants_data)} variante încărcate")
+                
+                all_numbers = [num for v in variants_data for num in v['numbers']]
+                unique_numbers = set(all_numbers)
+                counter = Counter(all_numbers)
+                most_common = counter.most_common(1)[0]
+                least_common = counter.most_common()[-1]
+                
+                st.markdown(f"""
+                **Statistici:**
+                - Numere unice folosite: **{len(unique_numbers)} din {total_numbers}**
+                - Cel mai frecvent: **{most_common[0]}** (apare de {most_common[1]}× ori)
+                - Cel mai rar: **{least_common[0]}** (apare de {least_common[1]}× ori)
+                """)
+                
+                # Preview
+                with st.expander("👁️ Preview primele 5 variante"):
+                    for i, v in enumerate(variants_data[:5]):
+                        st.text(f"{v['id']}, {' '.join(map(str, v['numbers']))}")
+                        
+            except Exception as e:
+                st.error(f"❌ Eroare la citirea fișierului: {str(e)}")
+    
+    with variant_tab2:
+        st.caption("Format: O variantă per linie - ID, num1 num2 num3 num4")
+        manual_variants = st.text_area(
+            "Introdu variantele aici:",
+            height=200,
+            placeholder="1, 5 12 23 34\n2, 7 15 22 38\n3, 3 14 27 41",
+            key="manual_variants"
+        )
+        
+        if manual_variants.strip():
+            try:
+                lines = [line.strip() for line in manual_variants.split('\n') if line.strip()]
+                
+                variants_list = []
+                for line in lines:
+                    if ',' in line:
+                        parts = line.split(',', 1)
+                        variant_id = parts[0].strip()
+                        numbers = [int(x) for x in parts[1].strip().split()]
+                        variants_list.append({'id': variant_id, 'numbers': numbers})
+                
+                variants_data = variants_list
+                
+                # Statistics
+                st.success(f"✅ {len(variants_data)} variante introduse")
+                
+                all_numbers = [num for v in variants_data for num in v['numbers']]
+                unique_numbers = set(all_numbers)
+                counter = Counter(all_numbers)
+                most_common = counter.most_common(1)[0]
+                least_common = counter.most_common()[-1]
+                
+                st.markdown(f"""
+                **Statistici:**
+                - Numere unice folosite: **{len(unique_numbers)} din {total_numbers}**
+                - Cel mai frecvent: **{most_common[0]}** (apare de {most_common[1]}× ori)
+                - Cel mai rar: **{least_common[0]}** (apare de {least_common[1]}× ori)
+                """)
+                
+                # Preview
+                with st.expander("👁️ Preview primele 5 variante"):
+                    for i, v in enumerate(variants_data[:5]):
+                        st.text(f"{v['id']}, {' '.join(map(str, v['numbers']))}")
+                        
+            except Exception as e:
+                st.error(f"❌ Eroare la procesarea variantelor: {str(e)}")
 
 with col_upload2:
-    st.subheader("📤 Upload Runde Câștigătoare (100+)")
-    st.caption("Format: num1 num2 num3 num4 (o rundă per linie)")
+    st.subheader("📤 Runde Câștigătoare (100+)")
     
-    rounds_file = st.file_uploader("Alege fișier .txt cu runde", type=['txt'], key="rounds")
+    rounds_tab1, rounds_tab2 = st.tabs(["📁 Upload Fișier", "✍️ Introducere Manuală"])
     
-    if rounds_file:
-        try:
-            content = rounds_file.read().decode('utf-8')
-            lines = [line.strip() for line in content.split('\n') if line.strip()]
-            
-            rounds_list = []
-            for line in lines:
-                numbers = [int(x) for x in line.split()]
-                rounds_list.append(numbers)
-            
-            rounds_data = rounds_list
-            
-            # Statistics
-            st.success(f"✅ {len(rounds_data)} runde încărcate")
-            
-            all_round_numbers = [num for r in rounds_data for num in r]
-            counter = Counter(all_round_numbers)
-            top_5 = counter.most_common(5)
-            
-            even_count = sum(1 for num in all_round_numbers if num % 2 == 0)
-            odd_count = len(all_round_numbers) - even_count
-            even_pct = (even_count / len(all_round_numbers) * 100) if all_round_numbers else 0
-            odd_pct = 100 - even_pct
-            
-            avg_sum = np.mean([sum(r) for r in rounds_data])
-            
-            top_5_str = ", ".join([f"{num}({count}×)" for num, count in top_5])
-            
-            st.markdown(f"""
-            **Analiza Rundelor:**
-            - Total runde: **{len(rounds_data)}**
-            - Top 5 frecvente: **{top_5_str}**
-            - Pare/Impare: **{even_pct:.0f}% / {odd_pct:.0f}%**
-            - Media sumei: **{avg_sum:.1f}**
-            """)
-            
-            # Preview
-            with st.expander("👁️ Preview primele 5 runde"):
-                for i, r in enumerate(rounds_data[:5]):
-                    st.text(' '.join(map(str, r)))
-                    
-        except Exception as e:
-            st.error(f"❌ Eroare la citirea fișierului: {str(e)}")
+    with rounds_tab1:
+        st.caption("Format: num1, num2, num3, num4 (o rundă per linie)")
+        rounds_file = st.file_uploader("Alege fișier .txt cu runde", type=['txt'], key="rounds")
+        
+        if rounds_file:
+            try:
+                content = rounds_file.read().decode('utf-8')
+                lines = [line.strip() for line in content.split('\n') if line.strip()]
+                
+                rounds_list = []
+                for line in lines:
+                    # Handle comma-separated numbers
+                    numbers = [int(x.strip()) for x in line.split(',') if x.strip()]
+                    rounds_list.append(numbers)
+                
+                rounds_data = rounds_list
+                
+                # Statistics
+                st.success(f"✅ {len(rounds_data)} runde încărcate")
+                
+                all_round_numbers = [num for r in rounds_data for num in r]
+                counter = Counter(all_round_numbers)
+                top_5 = counter.most_common(5)
+                
+                even_count = sum(1 for num in all_round_numbers if num % 2 == 0)
+                odd_count = len(all_round_numbers) - even_count
+                even_pct = (even_count / len(all_round_numbers) * 100) if all_round_numbers else 0
+                odd_pct = 100 - even_pct
+                
+                avg_sum = np.mean([sum(r) for r in rounds_data])
+                
+                top_5_str = ", ".join([f"{num}({count}×)" for num, count in top_5])
+                
+                st.markdown(f"""
+                **Analiza Rundelor:**
+                - Total runde: **{len(rounds_data)}**
+                - Top 5 frecvente: **{top_5_str}**
+                - Pare/Impare: **{even_pct:.0f}% / {odd_pct:.0f}%**
+                - Media sumei: **{avg_sum:.1f}**
+                """)
+                
+                # Preview
+                with st.expander("👁️ Preview primele 5 runde"):
+                    for i, r in enumerate(rounds_data[:5]):
+                        st.text(', '.join(map(str, r)))
+                        
+            except Exception as e:
+                st.error(f"❌ Eroare la citirea fișierului: {str(e)}")
+    
+    with rounds_tab2:
+        st.caption("Format: O rundă per linie - num1, num2, num3, num4")
+        manual_rounds = st.text_area(
+            "Introdu rundele aici:",
+            height=200,
+            placeholder="24, 46, 47, 44, 3, 60, 25, 33, 27, 40, 1, 58\n5, 12, 23, 34\n7, 15, 22, 38",
+            key="manual_rounds"
+        )
+        
+        if manual_rounds.strip():
+            try:
+                lines = [line.strip() for line in manual_rounds.split('\n') if line.strip()]
+                
+                rounds_list = []
+                for line in lines:
+                    # Handle comma-separated numbers
+                    numbers = [int(x.strip()) for x in line.split(',') if x.strip()]
+                    rounds_list.append(numbers)
+                
+                rounds_data = rounds_list
+                
+                # Statistics
+                st.success(f"✅ {len(rounds_data)} runde introduse")
+                
+                all_round_numbers = [num for r in rounds_data for num in r]
+                counter = Counter(all_round_numbers)
+                top_5 = counter.most_common(5)
+                
+                even_count = sum(1 for num in all_round_numbers if num % 2 == 0)
+                odd_count = len(all_round_numbers) - even_count
+                even_pct = (even_count / len(all_round_numbers) * 100) if all_round_numbers else 0
+                odd_pct = 100 - even_pct
+                
+                avg_sum = np.mean([sum(r) for r in rounds_data])
+                
+                top_5_str = ", ".join([f"{num}({count}×)" for num, count in top_5])
+                
+                st.markdown(f"""
+                **Analiza Rundelor:**
+                - Total runde: **{len(rounds_data)}**
+                - Top 5 frecvente: **{top_5_str}**
+                - Pare/Impare: **{even_pct:.0f}% / {odd_pct:.0f}%**
+                - Media sumei: **{avg_sum:.1f}**
+                """)
+                
+                # Preview
+                with st.expander("👁️ Preview primele 5 runde"):
+                    for i, r in enumerate(rounds_data[:5]):
+                        st.text(', '.join(map(str, r)))
+                        
+            except Exception as e:
+                st.error(f"❌ Eroare la procesarea rundelor: {str(e)}")
 
 st.markdown("---")
 
